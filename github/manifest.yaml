@@ -1,6 +1,6 @@
 name: github
 display_name: Github
-description: Integration providing import capabilities from Github repositories
+description: Integration providing import capabilities for Github
 homepage: https://github.com/PlakarKorp/integration-github
 license: ISC
 api_version: v1.1.0
