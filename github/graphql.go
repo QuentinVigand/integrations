@@ -20,6 +20,14 @@ type QueryPing struct {
 	RateLimit RateLimit
 }
 
+type QueryOrgs struct {
+	Viewer struct {
+		Organizations struct {
+			Nodes    []NodeOrg
+			PageInfo PageInfo
+		} `graphql:"organizations(first: 100, after: $cursor)"`
+	}
+}
 type QueryTeams struct {
 	Organization struct {
 		Teams struct {
@@ -32,7 +40,6 @@ type QueryTeams struct {
 type QueryMembers struct {
 	Organization struct {
 		Team struct {
-			Name    githubv4.String
 			Members struct {
 				Nodes    []NodeMember
 				PageInfo PageInfo
@@ -40,6 +47,13 @@ type QueryMembers struct {
 		} `graphql:"team(slug: $teamSlug)"`
 	} `graphql:"organization(login: $orgName)"`
 }
+
+type NodeOrg struct {
+	Login       githubv4.String
+	Name        githubv4.String
+	Description githubv4.String
+}
+
 type NodeTeam struct {
 	Slug githubv4.String
 }

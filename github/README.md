@@ -1,13 +1,20 @@
 # Github Integration
 
+# Work in progress
+
 ## Overview
 
-TODO
+**Github Integration**
 
 ## Configuration
 
-TODO
+- `token` (required) The github token that will be used to authenticate to github's API.
 
 ## Examples
 
-TODO
+```sh
+# Create a github configuration
+$ plakar source add my-github location=github://. token=$GITHUB_TOKEN organization=MyOrg
+# Backup my github
+$ plakar backup "@my-github"
+```
