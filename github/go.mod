@@ -5,6 +5,8 @@ go 1.26.1
 require (
 	github.com/PlakarKorp/go-kloset-sdk v1.1.0
 	github.com/PlakarKorp/kloset v1.1.2
+	github.com/shurcooL/githubv4 v0.0.0-20260209031235-2402fdf4a9ed
+	golang.org/x/oauth2 v0.36.0
 )
 
 require (
@@ -18,7 +20,6 @@ require (
 	github.com/nickball/go-aes-key-wrap v0.0.0-20170929221519-1c3aa3e4dfc5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.27 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/shurcooL/githubv4 v0.0.0-20260209031235-2402fdf4a9ed // indirect
 	github.com/shurcooL/graphql v0.0.0-20240915155400-7ee5256398cf // indirect
 	github.com/tink-crypto/tink-go/v2 v2.6.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
