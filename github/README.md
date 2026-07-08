@@ -17,7 +17,7 @@ make sure it has READ rights for all data you want to backup.*
 
 ```sh
 # Create a github configuration
-$ plakar source add my-github location=github://. token=$GITHUB_TOKEN
+$ plakar source add my-github location=gh:// token=$GITHUB_TOKEN
 # Backup my github
 $ plakar backup "@my-github"
 ```

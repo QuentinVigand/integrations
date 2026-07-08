@@ -9,4 +9,4 @@ contact: mailto:help@plakar.io
 connectors:
 - type: importer
   executable: github-importer
-  protocols: [github]
+  protocols: [gh]
