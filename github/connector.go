@@ -1,19 +1,26 @@
 package github
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"path"
+	"time"
 
 	"github.com/PlakarKorp/kloset/connectors"
 	"github.com/PlakarKorp/kloset/connectors/importer"
 	"github.com/PlakarKorp/kloset/location"
+	"github.com/PlakarKorp/kloset/objects"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
 type github struct {
-	organization string
-	client       *githubv4.Client
+	org    githubv4.String
+	client *githubv4.Client
 }
 
 func (g *github) Origin() string { return "https://api.github.com" }
@@ -25,7 +32,7 @@ func (g *github) Root() string { return "/" }
 func (g *github) Flags() location.Flags { return 0 }
 
 func (g *github) Ping(ctx context.Context) error {
-	var ping QPing
+	var ping QueryPing
 	err := g.client.Query(ctx, &ping, nil)
 	if err != nil {
 		return fmt.Errorf("running ping query: %w", err)
@@ -34,7 +41,83 @@ func (g *github) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (g *github) Import(context.Context, chan<- *connectors.Record, <-chan *connectors.Result) error {
+func (g *github) getTeamMembers(ctx context.Context, team githubv4.String) ([]NodeMember, error) {
+	var members []NodeMember
+	var membersCursor *githubv4.String
+
+	memberVars := map[string]any{
+		"orgName":       g.org,
+		"teamSlug":      team,
+		"membersCursor": membersCursor,
+	}
+
+	for {
+		var mq QueryMembers
+		if err := g.client.Query(ctx, &mq, memberVars); err != nil {
+			return members, fmt.Errorf("fetching members for team %s: %w", team, err)
+		}
+
+		members = append(members, mq.Organization.Team.Members.Nodes...)
+
+		if !mq.Organization.Team.Members.PageInfo.HasNextPage {
+			break
+		}
+		memberVars["membersCursor"] = new(mq.Organization.Team.Members.PageInfo.EndCursor)
+	}
+	return members, nil
+}
+
+func (g *github) Import(ctx context.Context, records chan<- *connectors.Record, results <-chan *connectors.Result) error {
+	basePath := fmt.Sprintf("/organization/%s", g.org)
+	defer close(records)
+
+	var teamsCursor *githubv4.String
+	teamsVars := map[string]any{
+		"orgName":     g.org,
+		"teamsCursor": teamsCursor,
+	}
+
+	for {
+		var qt QueryTeams
+		if err := g.client.Query(ctx, &qt, teamsVars); err != nil {
+			fmt.Fprintf(os.Stderr, "error: fetching teams: %v\n", err)
+			break
+		}
+
+		for _, team := range qt.Organization.Teams.Nodes {
+			members, err := g.getTeamMembers(ctx, team.Slug)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				continue
+			}
+			membersJson, err := json.Marshal(members)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: marshalling team members for %s: %v\n", team.Slug, err)
+				continue
+			}
+			fullpath := path.Join(basePath, "teams", string(team.Slug), "members.json")
+
+			fi := objects.FileInfo{
+				Lname:    "members.json",
+				Lsize:    int64(len(membersJson)),
+				Lmode:    0x644,
+				LmodTime: time.Now(),
+			}
+
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case records <- connectors.NewRecord(fullpath, "", fi, nil, func() (io.ReadCloser, error) {
+				return io.NopCloser(bytes.NewReader(membersJson)), nil
+			}):
+			}
+		}
+		if !qt.Organization.Teams.PageInfo.HasNextPage {
+			break
+		}
+		teamsVars["teamsCursor"] = new(qt.Organization.Teams.PageInfo.EndCursor)
+	}
+
 	return nil
 }
 func (g *github) Close(context.Context) error {
@@ -60,7 +143,7 @@ func NewImporter(ctx context.Context, opts *connectors.Options, str string, conf
 	httpClient := oauth2.NewClient(ctx, src)
 
 	return &github{
-		organization: org,
-		client:       githubv4.NewClient(httpClient),
+		org:    githubv4.String(org),
+		client: githubv4.NewClient(httpClient),
 	}, nil
 }
