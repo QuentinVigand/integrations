@@ -170,9 +170,7 @@ func (g *github) Import(ctx context.Context, records chan<- *connectors.Record, 
 	}
 	return nil
 }
-func (g *github) Close(context.Context) error {
-	return nil
-}
+func (g *github) Close(context.Context) error { return nil }
 
 func init() {
 	importer.Register("github", 0, NewImporter)
