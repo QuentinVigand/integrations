@@ -2,12 +2,6 @@ package github
 
 import "github.com/shurcooL/githubv4"
 
-type RateLimit struct {
-	Limit     githubv4.Int
-	Remaining githubv4.Int
-	ResetAt   githubv4.DateTime
-}
-
 type PageInfo struct {
 	EndCursor   githubv4.String
 	HasNextPage githubv4.Boolean
@@ -17,7 +11,6 @@ type QueryPing struct {
 	Viewer struct {
 		Login githubv4.String
 	}
-	RateLimit RateLimit
 }
 
 type QueryOrgs struct {
