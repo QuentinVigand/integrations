@@ -36,8 +36,6 @@ func (g *github) Ping(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("running ping query: %w", err)
 	}
-	// TODO handle invalid or expired token / missing permissions
-	// Do something with the rate limit maybe?
 	return nil
 }
 
