@@ -2,6 +2,8 @@ package github
 
 import "github.com/shurcooL/githubv4"
 
+// GitHub's graphql max page size is 100 hence the (first: 100..) in graphql tags.
+
 type PageInfo struct {
 	EndCursor   githubv4.String
 	HasNextPage githubv4.Boolean

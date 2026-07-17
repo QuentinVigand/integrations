@@ -1,10 +1,11 @@
 # Github Integration
 
-# Work in progress
-
 ## Overview
 
 **GitHub** integration for all GitHub's data available through GitHub's APIs.
+
+Provided connectors:
+- Importer
 
 *Note: when creating a GitHub token for this integration,
 make sure it has READ rights for all data you want to backup.*
